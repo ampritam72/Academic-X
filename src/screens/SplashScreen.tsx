@@ -56,7 +56,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         </motion.h1>
 
         <motion.div
-          className="px-6 py-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-sm font-medium tracking-wide opacity-80"
+          className="px-4 py-1.5 xs:px-6 xs:py-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-[11px] xs:text-xs sm:text-sm font-medium tracking-wide opacity-80 whitespace-nowrap text-center"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7 }}

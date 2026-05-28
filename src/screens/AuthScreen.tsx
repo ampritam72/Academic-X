@@ -108,7 +108,7 @@ export function AuthScreen() {
             />
           </div>
           <h1 className="text-4xl font-black text-[#1E293B] dark:text-white mt-4 tracking-tight transition-colors">Academic X</h1>
-          <p className="text-slate-400 dark:text-slate-400 text-sm font-medium mt-1">Your Smart AI Study & Club Companion</p>
+          <p className="text-slate-400 dark:text-slate-400 text-[11px] xs:text-xs sm:text-sm font-medium mt-1 whitespace-nowrap">Your Smart AI Study & Club Companion</p>
         </div>
 
         {/* Auth Card */}
