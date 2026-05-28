@@ -30,10 +30,12 @@ export function AuthScreen() {
   // We'll use a local mock login for the UI mood
   const [localLoading, setLocalLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [authErrorCode, setAuthErrorCode] = useState<string | null>(null);
 
   const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
     setAuthError(null);
+    setAuthErrorCode(null);
     setLocalLoading(true);
     
     try {
@@ -65,8 +67,10 @@ export function AuthScreen() {
         );
       }
     } catch (err: any) {
+      console.error("Firebase auth error details:", err);
+      setAuthErrorCode(err.code || null);
       if (err.code === 'auth/invalid-credential') {
-        setAuthError('Invalid credentials. Please make sure Email and Password are correct, and checking Firebase Authentication sign in options.');
+        setAuthError('Invalid credentials. Please make sure your Student ID / Email and Password are correct, and your Email/Password Provider is enabled in the Firebase Console.');
       } else {
         setAuthError(err.message || 'An error occurred during authentication.');
       }
@@ -135,8 +139,41 @@ export function AuthScreen() {
 
           <form onSubmit={handleAuth} className="space-y-4">
             {authError && (
-              <div className="bg-red-50 dark:bg-red-900/10 text-red-500 dark:text-red-400 p-3 rounded-2xl text-xs font-semibold text-center mt-2 border border-red-100 dark:border-red-500/20">
-                {authError}
+              <div className="bg-red-50 dark:bg-slate-900/40 text-red-500 dark:text-red-400 p-4 rounded-2xl text-xs font-semibold mt-2 border border-red-100 dark:border-slate-800 transition-all flex flex-col gap-2">
+                <p className="text-center font-bold text-sm">⚠️ {lang === 'EN' ? 'Authentication Issue' : 'অথেন্টিকেশন সমস্যা'}</p>
+                <div className="text-slate-500 dark:text-slate-400 text-center font-medium leading-relaxed">{authError}</div>
+                {authErrorCode && (
+                  <div className="mt-2 p-3 bg-red-100/30 dark:bg-red-950/20 rounded-xl border border-dashed border-red-200 dark:border-red-900/30 text-[11px] font-medium space-y-1.5 transition-colors">
+                    <p className="font-bold text-red-600 dark:text-red-300">Code: <code className="font-mono">{authErrorCode}</code></p>
+                    {authErrorCode === 'auth/unauthorized-domain' && (
+                      <div className="space-y-1 text-slate-600 dark:text-slate-300">
+                        <p className="font-semibold text-xs text-left">💡 Quick Fix (Authorized Domains):</p>
+                        <p className="text-left"><strong>EN:</strong> Go to Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains and add: <code className="p-1 font-mono rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 select-all">{window.location.hostname}</code></p>
+                        <p className="text-left"><strong>BN:</strong> Firebase কনসোলে Authentication &gt; Settings &gt; Authorized domains-এ গিয়ে ডোমেন হিসেবে <code className="p-1 font-mono rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 select-all">{window.location.hostname}</code> এড করুন।</p>
+                      </div>
+                    )}
+                    {authErrorCode === 'auth/operation-not-allowed' && (
+                      <div className="space-y-1 text-slate-600 dark:text-slate-300">
+                        <p className="font-semibold text-xs text-left">💡 Quick Fix (Enable Providers):</p>
+                        <p className="text-left"><strong>EN:</strong> Go to Firebase Console &gt; Authentication &gt; Sign-in method. Make sure both <strong>Email/Password</strong> and <strong>Google</strong> providers are enabled.</p>
+                        <p className="text-left"><strong>BN:</strong> Firebase কনসোলে Authentication &gt; Sign-in method-এ গিয়ে <strong>Email/Password</strong> এবং <strong>Google</strong> প্রোভাইডার দুটোই Enable/অন করুন।</p>
+                      </div>
+                    )}
+                    {authErrorCode === 'auth/popup-blocked' && (
+                      <div className="space-y-1 text-slate-600 dark:text-slate-300">
+                        <p className="font-semibold text-xs text-left">💡 Quick Fix (Popup Blocked):</p>
+                        <p className="text-left"><strong>EN:</strong> Please allow popups for this site in your browser search bar or open the app in a new dedicated tab using the top icon.</p>
+                        <p className="text-left"><strong>BN:</strong> ব্রাউজারে পপআপ ব্লক করা আছে। দয়া করে এড্রেসবারের পপআপ আইকন থেকে এলাউ করুন অথবা নতুন ট্যাবে অ্যাপটি ওপেন করুন।</p>
+                      </div>
+                    )}
+                    {authErrorCode === 'auth/popup-closed-by-user' && (
+                      <div className="space-y-1 text-slate-600 dark:text-slate-300">
+                        <p className="text-left"><strong>EN:</strong> The authentication window was closed before signing in. Please try again.</p>
+                        <p className="text-left"><strong>BN:</strong> লগইন পপ-আপ উইন্ডোটি আপনি সাইন-ইন শেষ করার আগেই বন্ধ করে দিয়েছেন। দয়া করে আবার চেষ্টা করুন।</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             <AnimatePresence mode="wait">
@@ -296,7 +333,20 @@ export function AuthScreen() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button type="button" onClick={loginWithGoogle} className="flex items-center justify-center gap-3 py-4 rounded-3xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm bg-white dark:bg-slate-800 active:scale-[0.98]">
+            <button type="button" onClick={async () => {
+              try {
+                setAuthError(null);
+                setAuthErrorCode(null);
+                setLocalLoading(true);
+                await loginWithGoogle();
+              } catch (err: any) {
+                console.error("Firebase auth error details:", err);
+                setAuthErrorCode(err.code || null);
+                setAuthError(err.message || 'Google Login failed.');
+              } finally {
+                setLocalLoading(false);
+              }
+            }} className="flex items-center justify-center gap-3 py-4 rounded-3xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm bg-white dark:bg-slate-800 active:scale-[0.98]">
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Google</span>
             </button>
