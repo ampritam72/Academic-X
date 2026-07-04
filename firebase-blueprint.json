@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account and profile information",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "batch": { "type": "string" },
+        "section": { "type": "string" },
+        "department": { "type": "string" },
+        "cgpa": { "type": "number" },
+        "avatarUrl": { "type": "string" },
+        "streakDays": { "type": "integer" },
+        "points": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "fullName", "email"]
+    },
+    "Notice": {
+      "title": "Notice",
+      "description": "Official or section-specific notices",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["Uni", "Batch", "Dept"] },
+        "authorId": { "type": "string" },
+        "batch": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Slide": {
+      "title": "Course Slide",
+      "description": "Metadata for course slides",
+      "type": "object",
+      "properties": {
+        "courseCode": { "type": "string" },
+        "title": { "type": "string" },
+        "semester": { "type": "integer" },
+        "driveUrl": { "type": "string" },
+        "fileType": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "StudyNote": {
+      "title": "Study Note",
+      "description": "AI-generated study materials from slides or user input",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "sourceUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Club": {
+      "title": "Club",
+      "description": "University clubs and societies",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "mentor": { "type": "string" },
+        "presidentId": { "type": "string" },
+        "membersCount": { "type": "integer" },
+        "bannerUrl": { "type": "string" }
+      }
+    },
+    "ClubEvent": {
+      "title": "Club Event",
+      "description": "Events organized by clubs",
+      "type": "object",
+      "properties": {
+        "clubId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "location": { "type": "string" }
+      }
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "Messages sent in groups or personal chats",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "A chat session between users or a section group",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["personal", "group"] },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "lastMessageAt": { "type": "string", "format": "date-time" },
+        "name": { "type": "string" },
+        "section": { "type": "string" },
+        "batch": { "type": "string" },
+        "targetSemester": { "type": "string" }
+      }
+    },
+    "SectionConfig": {
+      "title": "Section Configuration",
+      "description": "Mapping student ID ranges to sections",
+      "type": "object",
+      "properties": {
+        "section": { "type": "string" },
+        "batch": { "type": "string" },
+        "semester": { "type": "string" },
+        "minId": { "type": "string" },
+        "maxId": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile information"
+    },
+    "/notices/{noticeId}": {
+      "schema": "Notice",
+      "description": "Global and batch notices"
+    },
+    "/slides/{slideId}": {
+      "schema": "Slide",
+      "description": "Academic materials repo"
+    },
+    "/users/{userId}/studyNotes/{noteId}": {
+      "schema": "StudyNote",
+      "description": "Personalized study notes"
+    },
+    "/clubs/{clubId}": {
+      "schema": "Club",
+      "description": "Club details"
+    },
+    "/clubs/{clubId}/events/{eventId}": {
+      "schema": "ClubEvent",
+      "description": "Club activities"
+    },
+    "/chats/{chatId}": {
+      "schema": "Conversation",
+      "description": "Conversation metadata"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Real-time communication"
+    },
+    "/sectionConfigs/{configId}": {
+      "schema": "SectionConfig",
+      "description": "Rules for automatic group assignment"
+    }
+  }
+}
